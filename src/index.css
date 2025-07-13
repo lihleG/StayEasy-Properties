@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+.property-list {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6;
+}
+
+.property-card {
+    @apply border border-gray-300 rounded-2xl p-4 shadow-lg bg-white hover:shadow-2xl transition-shadow duration-300;
+}
+
+.property-image {
+    @apply w-full h-48 object-cover rounded-lg mb-4;
+}
+
+.property-card h2 {
+    @apply text-xl font-semibold text-gray-800 mb-2;
+}
+
+.property-card .details {
+    @apply flex items-center justify-around text-gray-600 mb-4;
+}
+
+.details span {
+    @apply flex items-center gap-2 text-sm;
+}
+
+.property-card button {
+    @apply bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300;
+}
+
+/* Testimonials Section */
+.testimonials-section {
+  background: #f7f7f7;
+  padding: 40px 20px;
+  margin-top: 30px;
+}
+
+.testimonials-container {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping of cards */
+  justify-content: center; /* Center-align cards */
+  gap: 20px; /* Add spacing between cards */
+}
+
+.testimonial-card {
+  flex: 1 1 300px; /* Responsive card sizing */
+  max-width: 300px;
+  padding: 20px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: box-shadow 0.3s ease;
+}
+
+.testimonial-card:hover {
+  box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.testimonial-review {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.testimonial-name {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #333;
+  margin-top: 10px;
+}
+
+.testimonial-rating {
+  font-size: 1.2rem;
+  color: gold;
+}
+
+/* General Typography */
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+.login-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+/* Add to your CSS file */
+.google-login-button {
+  background-color: #fff;
+  color: #757575;
+  border: 1px solid #ddd;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+  width: 100%;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.google-login-button:hover {
+  background-color: #f8f8f8;
+}
+
+.google-logo {
+  width: 20px;
+  height: 20px;
+}
+
+
