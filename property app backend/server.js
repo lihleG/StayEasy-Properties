@@ -55,6 +55,11 @@ app.post('/api/login', async (req, res) => {
   res.status(401).json({ message: 'Invalid credentials' });
 });
 
+// Health check route to prevent loading issue
+app.get('/', (req, res) => {
+  res.send('🚀 StayEasy Backend API is running');
+});
+
 // Error handlers
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
 
@@ -68,6 +73,7 @@ const PORT = process.env.PORT || 5000;
 connectDB().then(() => {
   app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 });
+
 
 
 
