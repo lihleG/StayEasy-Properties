@@ -4,9 +4,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import mongoose from 'mongoose';
-import Property from './models/Property.js';
 import propertyRoutes from './routes/propertyRoutes.js';
-import jwt from 'jsonwebtoken'; // Missing in your code
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
@@ -16,7 +15,7 @@ const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key_here';
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.CLIENT_URL || '*',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -33,12 +32,7 @@ app.use(limiter);
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      dbName: process.env.DB_NAME || 'property-listing',
-      tls: true,
-      ssl: true,
-      tlsAllowInvalidCertificates: true,
+      dbName: process.env.DB_NAME || 'property-listing'
     });
     console.log('✅ MongoDB Connected');
   } catch (err) {
@@ -46,12 +40,10 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-connectDB();
 
 // Routes
 app.use('/api/properties', propertyRoutes);
 
-// Dummy login route
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -71,18 +63,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal server error' });
 });
 
-// Start server
+// Start server after DB connection
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-
-process.on('SIGINT', () => {
-  console.log('🔻 Shutting down gracefully...');
-  server.close(() => {
-    mongoose.connection.close(() => {
-      console.log('🔻 MongoDB connection closed');
-      process.exit(0);
-    });
-  });
+connectDB().then(() => {
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 });
+
 
 
