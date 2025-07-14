@@ -4,6 +4,9 @@ import { useQuery } from 'react-query';
 import axios from 'axios';
 import { FunnelIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/outline';
 
+// Use environment variable for API base URL, fallback to localhost for dev
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+
 // Helper to parse "R 1,000,000" to 1000000
 const parsePrice = (priceString) => {
   if (!priceString) return 0;
@@ -14,7 +17,7 @@ const parsePrice = (priceString) => {
 // API call to fetch properties
 const fetchProperties = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/properties');
+    const response = await axios.get(`${API_BASE_URL}/api/properties`);
     console.log('API response data:', response.data);
 
     if (Array.isArray(response.data)) return response.data;
@@ -69,7 +72,7 @@ const PropertiesPage = () => {
       property?.description?.toLowerCase().includes(search) ||
       property?.location?.toLowerCase().includes(search) ||
       property?.category?.toLowerCase().includes(search) ||
-      property?.price?.toLowerCase?.().includes(search); // if price is string like "R 1,000,000"
+      (property?.price && property.price.toLowerCase().includes(search)); // fixed price check
 
     const matchesCategory =
       filters.category === 'All' || property?.category === filters.category;
@@ -234,4 +237,5 @@ const PropertiesPage = () => {
 };
 
 export default PropertiesPage;
+
 
