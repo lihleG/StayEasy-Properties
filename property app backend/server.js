@@ -12,10 +12,12 @@ dotenv.config();
 const app = express();
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key_here';
 
+const allowedOrigin = process.env.CLIENT_URL || 'https://stayeasyproperties.netlify.app';
+
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
+  origin: allowedOrigin,
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
