@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { GoogleAuthProvider, signInWithPopup, getAuth } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { ToastContainer, toast } from 'react-toastify';
+import { FaUserCircle, FaBars } from 'react-icons/fa';
 import 'react-toastify/dist/ReactToastify.css';
-import { FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
 import headerImage from '../assets/header_img.png';
 
 // Firebase config
@@ -83,7 +83,6 @@ const RealEstateHeader = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <div className="text-3xl font-bold text-sky-600">StayEasy</div>
 
-          {/* Desktop Links */}
           <div className="hidden md:flex space-x-8">
             {navLinks.map(item => (
               <Link
@@ -96,8 +95,13 @@ const RealEstateHeader = () => {
             ))}
           </div>
 
-          {/* Right Side Buttons */}
-          <div className="flex items-center space-x-4">
+          <div className="md:hidden">
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white text-2xl">
+              <FaBars />
+            </button>
+          </div>
+
+          <div className="hidden md:flex items-center space-x-4">
             {!user ? (
               <button
                 onClick={handleGoogleLogin}
@@ -111,24 +115,15 @@ const RealEstateHeader = () => {
 
             <button
               onClick={() => navigate('/dashboard')}
-              className="hidden md:inline bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-full transition-colors"
+              className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-full transition-colors"
             >
               Add Property
-            </button>
-
-            {/* Burger Menu Icon */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-white text-2xl"
-            >
-              {mobileMenuOpen ? <FaTimes /> : <FaBars />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className={`md:hidden absolute top-16 left-0 w-full bg-white shadow-lg p-6 z-50 transition-all duration-300`}>
+          <div className="md:hidden bg-white py-4 px-6 shadow-lg">
             <div className="flex flex-col space-y-4">
               {navLinks.map(item => (
                 <Link
@@ -140,12 +135,17 @@ const RealEstateHeader = () => {
                   {item.name}
                 </Link>
               ))}
+
               <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  navigate('/dashboard');
-                }}
-                className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-full transition-colors"
+                onClick={handleGoogleLogin}
+                className="bg-sky-500 text-white rounded-lg py-2 mt-4"
+              >
+                {user ? 'Logged In' : 'Login'}
+              </button>
+
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="bg-sky-500 text-white rounded-lg py-2 mt-2"
               >
                 Add Property
               </button>
@@ -154,7 +154,7 @@ const RealEstateHeader = () => {
         )}
       </nav>
 
-      {/* Hero + Search Form + Results (Unchanged) */}
+      {/* Hero Section + Search + Results */}
       <div
         className="relative min-h-screen flex items-center justify-center"
         style={{
@@ -164,14 +164,100 @@ const RealEstateHeader = () => {
           backgroundRepeat: 'no-repeat',
         }}
       >
-        {/* Existing hero and search form code continues here... */}
-        {/* Leave as is - No changes to hero, search or results */}
+        <div className="max-w-5xl w-full px-4 z-10">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center mb-8">
+            Let's Find Your Dream Home
+          </h1>
+
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-1">
+              {['General', 'Villa', 'Apartment'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-6 py-3 rounded-md text-sm md:text-base font-medium transition-colors ${
+                    activeTab === tab ? 'bg-sky-500 text-white' : 'text-white hover:bg-white hover:bg-opacity-10'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white/20 backdrop-blur-lg rounded-xl shadow-xl p-6 border border-white/30">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-white text-sm font-medium mb-1">Category</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:border-transparent"
+                >
+                  <option value="">Select Category</option>
+                  <option value="Residential">Residential</option>
+                  <option value="Commercial">Commercial</option>
+                  <option value="Vacation">Vacation</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-white text-sm font-medium mb-1">Location</label>
+                <select
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:border-transparent"
+                >
+                  <option value="">Select Location</option>
+                  <option value="Johannesburg">Johannesburg</option>
+                  <option value="Pretoria">Pretoria</option>
+                  <option value="Cape Town">Cape Town</option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  onClick={handleSearch}
+                  className="w-full bg-sky-500 hover:bg-sky-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center"
+                >
+                  <span>Search</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            {loading ? (
+              <div className="text-white text-center">Loading results...</div>
+            ) : results.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {results.map((property) => (
+                  <div key={property._id} className="bg-white shadow-lg rounded-lg p-4">
+                    <img
+                      src={property.image}
+                      alt={property.title}
+                      className="w-full h-48 object-cover rounded-md mb-4"
+                    />
+                    <h3 className="text-lg font-bold text-gray-800">{property.title}</h3>
+                    <p className="text-gray-600">{property.location}</p>
+                    <p className="text-blue-300 font-semibold">
+                      R{property.price.toLocaleString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-white text-center mt-4">No properties found.</div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default RealEstateHeader;
+
 
 
 
