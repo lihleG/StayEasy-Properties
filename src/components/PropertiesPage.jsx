@@ -4,19 +4,22 @@ import { useQuery } from 'react-query';
 import axios from 'axios';
 import { FunnelIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/outline';
 
-// API URL supports Render & Localhost fallback
+// Use environment variable for API base URL, fallback to localhost for dev
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
-// Parse price from "R 1,000,000" to 1000000
+// Helper to parse "R 1,000,000" to 1000000
 const parsePrice = (priceString) => {
   if (!priceString) return 0;
-  return parseInt(priceString.toString().replace(/[^0-9]/g, ''), 10);
+  const cleaned = priceString.toString().replace(/[^0-9]/g, '');
+  return parseInt(cleaned, 10);
 };
 
+// API call to fetch properties
 const fetchProperties = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/api/properties`);
-    return Array.isArray(response.data) ? response.data : response.data?.properties || [];
+    // Return data as is (array or object depending on your backend)
+    return response.data;
   } catch (error) {
     console.error('API Error:', error);
     return [];
@@ -25,6 +28,7 @@ const fetchProperties = async () => {
 
 const PropertiesPage = () => {
   const location = useLocation();
+
   const [filters, setFilters] = useState({
     search: '',
     category: 'All',
@@ -37,13 +41,13 @@ const PropertiesPage = () => {
     const params = new URLSearchParams(location.search);
     const category = params.get('category');
     if (category) {
-      setFilters(prev => ({ ...prev, category }));
+      setFilters((prev) => ({ ...prev, category }));
     }
   }, [location.search]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prev => ({ ...prev, [name]: value }));
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
   const { data, isLoading, isError, error } = useQuery('properties', fetchProperties);
@@ -54,16 +58,32 @@ const PropertiesPage = () => {
     const propertyPrice = parsePrice(property?.price);
     const search = filters.search.toLowerCase();
 
-    const matchesSearch = [
-      property?.title, property?.description, property?.location, property?.category, property?.price
-    ].some(field => field?.toString().toLowerCase().includes(search));
+    const matchesSearch =
+      property?.title?.toLowerCase().includes(search) ||
+      property?.description?.toLowerCase().includes(search) ||
+      property?.location?.toLowerCase().includes(search) ||
+      property?.category?.toLowerCase().includes(search) ||
+      (property?.price && property.price.toLowerCase().includes(search));
 
-    const matchesCategory = filters.category === 'All' || property?.category === filters.category;
-    const matchesLocation = property?.location?.toLowerCase().includes(filters.location.toLowerCase());
-    const matchesMinPrice = !filters.minPrice || propertyPrice >= Number(filters.minPrice);
-    const matchesMaxPrice = !filters.maxPrice || propertyPrice <= Number(filters.maxPrice);
+    const matchesCategory =
+      filters.category === 'All' || property?.category === filters.category;
 
-    return matchesSearch && matchesCategory && matchesLocation && matchesMinPrice && matchesMaxPrice;
+    const matchesLocation =
+      property?.location?.toLowerCase().includes(filters.location.toLowerCase());
+
+    const matchesMinPrice =
+      !filters.minPrice || propertyPrice >= Number(filters.minPrice);
+
+    const matchesMaxPrice =
+      !filters.maxPrice || propertyPrice <= Number(filters.maxPrice);
+
+    return (
+      matchesCategory &&
+      matchesSearch &&
+      matchesLocation &&
+      matchesMinPrice &&
+      matchesMaxPrice
+    );
   });
 
   if (isLoading) return <div className="text-center py-8">Loading properties...</div>;
@@ -72,20 +92,94 @@ const PropertiesPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Filter UI */}
+        {/* Filter Bar */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {/* Search, Category, Location, Price inputs here */}
-            {/* (Same as before - no change in UI logic) */}
+            {/* Search */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="search"
+                  placeholder="What are you looking for?"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={filters.search}
+                  onChange={handleFilterChange}
+                />
+                <FunnelIcon className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
+              </div>
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                name="category"
+                className="w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={filters.category}
+                onChange={handleFilterChange}
+              >
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Location"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={filters.location}
+                  onChange={handleFilterChange}
+                />
+                <MapPinIcon className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
+              </div>
+            </div>
+
+            {/* Min Price */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Min Price</label>
+              <input
+                type="number"
+                name="minPrice"
+                placeholder="Min"
+                className="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={filters.minPrice}
+                onChange={handleFilterChange}
+                min="0"
+              />
+            </div>
+
+            {/* Max Price */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Max Price</label>
+              <input
+                type="number"
+                name="maxPrice"
+                placeholder="Max"
+                className="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={filters.maxPrice}
+                onChange={handleFilterChange}
+                min="0"
+              />
+            </div>
           </div>
         </div>
 
+        {/* Results Header */}
         <div className="mb-6 flex justify-between items-center">
           <h2 className="text-xl font-semibold text-gray-800">
             {filteredProperties.length} {filteredProperties.length === 1 ? 'Property' : 'Properties'} Found
           </h2>
         </div>
 
+        {/* Property Grid */}
         {filteredProperties.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProperties.map(property => (
@@ -99,20 +193,23 @@ const PropertiesPage = () => {
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800">{property.title}</h3>
-                  <p className="text-sm text-gray-600 mt-2 flex items-center">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-semibold text-gray-800">{property.title}</h3>
+                    <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2 py-1 rounded">
+                      {property.price}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 mt-2 flex items-center">
                     <MapPinIcon className="h-4 w-4 mr-1" />
                     {property.location}
                   </p>
                   <p className="text-gray-500 text-sm mt-2 line-clamp-2">{property.description}</p>
                   <div className="mt-4 flex justify-between items-center">
-                    <span className="bg-gray-100 px-2 py-1 rounded text-sm">
-                      <StarIcon className="h-4 w-4 text-yellow-500 inline mr-1" />
+                    <span className="inline-flex items-center bg-gray-100 px-2 py-1 rounded text-sm">
+                      <StarIcon className="h-4 w-4 text-yellow-500 mr-1" />
                       {property.rating || 'N/A'}
                     </span>
-                    <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2 py-1 rounded">
-                      {property.price}
-                    </span>
+                    <span className="text-sm text-gray-500">{property.category}</span>
                   </div>
                 </div>
               </div>
@@ -120,7 +217,9 @@ const PropertiesPage = () => {
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
-            No properties match your search/filter.
+            {properties.length === 0
+              ? 'No properties found from API'
+              : 'No properties match your search/filter'}
           </div>
         )}
       </div>
@@ -129,6 +228,8 @@ const PropertiesPage = () => {
 };
 
 export default PropertiesPage;
+
+
 
 
 

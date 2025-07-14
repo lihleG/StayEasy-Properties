@@ -12,31 +12,36 @@ dotenv.config();
 const app = express();
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key_here';
 
-// CORS Setup (Allow Netlify + Localhost)
+// CORS Setup: Allow Netlify, Localhost:5173, and Localhost:3000
 const allowedOrigins = [
-  process.env.CLIENT_URL || 'https://stayeasyproperties.netlify.app',
+  'https://stayeasyproperties.netlify.app',
   'http://localhost:5173',
   'http://localhost:3000'
 ];
 
 app.use(helmet());
+
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (like Postman, server-to-server)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error(`❌ CORS Error: Blocked origin -> ${origin}`);
       callback(new Error(`CORS Error: ${origin} is not allowed`));
     }
   },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json({ limit: '10kb' }));
 
+// Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
-  message: 'Too many requests from this IP, please try again later',
+  message: 'Too many requests from this IP, please try again later'
 });
 app.use(limiter);
 
@@ -67,15 +72,19 @@ app.post('/api/login', (req, res) => {
   res.status(401).json({ message: 'Invalid credentials' });
 });
 
-// Health Check
+// Health Check (Render-friendly)
 app.get('/', (req, res) => {
   res.send('🚀 StayEasy Backend API is running');
 });
 
-// Error Handling
-app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+// Global Error Handler
 app.use((err, req, res, next) => {
-  console.error('Server error:', err);
+  console.error('❌ Server error:', err.message);
   res.status(500).json({ message: 'Internal server error' });
 });
 
