@@ -4,21 +4,16 @@ import { useQuery } from 'react-query';
 import axios from 'axios';
 import { FunnelIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/outline';
 
-// Use environment variable for API base URL, fallback to localhost for dev
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-
 // Helper to parse "R 1,000,000" to 1000000
 const parsePrice = (priceString) => {
   if (!priceString) return 0;
-  const cleaned = priceString.toString().replace(/[^0-9]/g, '');
-  return parseInt(cleaned, 10);
+  return parseInt(priceString.toString().replace(/[^0-9]/g, ''), 10);
 };
 
-// API call to fetch properties
+// Fetch properties using Netlify Function proxy (to bypass CORS)
 const fetchProperties = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/properties`);
-    // Return data as is (array or object depending on your backend)
+    const response = await axios.get('/.netlify/functions/fetch-properties');
     return response.data;
   } catch (error) {
     console.error('API Error:', error);

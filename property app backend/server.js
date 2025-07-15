@@ -12,40 +12,41 @@ dotenv.config();
 const app = express();
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key_here';
 
-// CORS Setup: Allow Netlify, Localhost:5173, and Localhost:3000
+// Allowed origins (Netlify, Localhost, Render frontend, etc.)
 const allowedOrigins = [
   'https://stayeasyproperties.netlify.app',
   'http://localhost:5173',
   'http://localhost:3000'
 ];
 
+// CORS Setup
 app.use(helmet());
-
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like Postman, server-to-server)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.error(`❌ CORS Error: Blocked origin -> ${origin}`);
-      callback(new Error(`CORS Error: ${origin} is not allowed`));
+    if (!origin) return callback(null, true); // Allow server-to-server, Postman, etc.
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+
+    console.error(`❌ CORS blocked: ${origin}`);
+    return callback(new Error(`CORS Error: ${origin} is not allowed`));
   },
+  credentials: true,
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json({ limit: '10kb' }));
 
-// Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
-  message: 'Too many requests from this IP, please try again later'
+  message: 'Too many requests from this IP, please try again later',
 });
 app.use(limiter);
 
-// MongoDB Connect
+// MongoDB Connection
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
@@ -72,27 +73,27 @@ app.post('/api/login', (req, res) => {
   res.status(401).json({ message: 'Invalid credentials' });
 });
 
-// Health Check (Render-friendly)
+// Health check
 app.get('/', (req, res) => {
   res.send('🚀 StayEasy Backend API is running');
 });
 
-// 404 Handler
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
-
-// Global Error Handler
+// Error handlers
+app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
 app.use((err, req, res, next) => {
-  console.error('❌ Server error:', err.message);
+  console.error('Server error:', err);
   res.status(500).json({ message: 'Internal server error' });
 });
 
-// Start Server
+// Start server
 const PORT = process.env.PORT || 5000;
 connectDB().then(() => {
   app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 });
+
+
+
+
 
 
 
