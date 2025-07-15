@@ -1,12 +1,11 @@
 import mongoose from 'mongoose';
-import Property from './models/Property.js';
+import Property from '../../models/Property.js'; // Adjust this path!
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 let conn = null;
 
-// Connect to MongoDB once (reuse connection on cold starts)
 async function connectToDatabase() {
   if (conn) return conn;
 
@@ -39,5 +38,6 @@ export async function handler(event, context) {
     };
   }
 }
+
 
 
