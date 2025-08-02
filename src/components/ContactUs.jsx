@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import emailjs from 'emailjs-com';
 import toast from 'react-hot-toast';
 
 const ContactUs = () => {
@@ -24,15 +25,28 @@ const ContactUs = () => {
       return;
     }
 
-    // ✅ Simulate sending message
-    toast.success('Message sent successfully!');
-    setFormData({
-      name: '',
-      email: '',
-      date: '',
-      time: '',
-      message: ''
-    });
+    // Send email using EmailJS
+    emailjs.send(
+      'service_rfja9rk',      
+      'template_c1h13ak',      
+      formData,
+      '7jPB_pYxf9WgAYAsl'    
+    ).then(
+      () => {
+        toast.success('Message sent successfully!');
+        setFormData({
+          name: '',
+          email: '',
+          date: '',
+          time: '',
+          message: ''
+        });
+      },
+      (error) => {
+        console.error(error);
+        toast.error('Failed to send message.');
+      }
+    );
   };
 
   return (
@@ -84,6 +98,7 @@ const ContactUs = () => {
               onChange={handleChange}
               type="text"
               placeholder="Name*"
+              required
               className="p-3 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
             <input
@@ -92,6 +107,7 @@ const ContactUs = () => {
               onChange={handleChange}
               type="email"
               placeholder="Email*"
+              required
               className="p-3 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
@@ -148,6 +164,8 @@ const ContactUs = () => {
 };
 
 export default ContactUs;
+
+
 
 
 
