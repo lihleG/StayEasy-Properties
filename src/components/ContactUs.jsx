@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
+    title: '',
     name: '',
     email: '',
     date: '',
@@ -18,23 +19,23 @@ const ContactUs = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const { name, email } = formData;
+    const { name, email, title } = formData;
 
-    if (!name || !email) {
+    if (!name || !email || !title) {
       toast.error('Please fill in all required fields');
       return;
     }
 
-    // Send email using EmailJS
     emailjs.send(
-      'service_rfja9rk',      
-      'template_c1h13ak',      
-      formData,
-      '7jPB_pYxf9WgAYAsl'    
+      'service_rfja9rk',        // ✅ Your Service ID
+      'template_c1h13ak',       // ✅ Your Template ID
+      formData,                 // ✅ Make sure this matches template vars
+      '7jPB_pYxf9WgAYAsl'        // ✅ Your Public Key
     ).then(
       () => {
         toast.success('Message sent successfully!');
         setFormData({
+          title: '',
           name: '',
           email: '',
           date: '',
@@ -43,7 +44,7 @@ const ContactUs = () => {
         });
       },
       (error) => {
-        console.error(error);
+        console.error('EmailJS Error:', error);
         toast.error('Failed to send message.');
       }
     );
@@ -91,6 +92,16 @@ const ContactUs = () => {
 
         {/* ✅ Contact Form */}
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md space-y-4">
+          <input
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            type="text"
+            placeholder="Subject / Title*"
+            required
+            className="p-3 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
+          />
+
           <div className="grid md:grid-cols-2 gap-4">
             <input
               name="name"
